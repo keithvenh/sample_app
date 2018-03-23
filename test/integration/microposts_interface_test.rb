@@ -17,10 +17,12 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
     assert_select 'div#error-explanation'
     # Valid submission
     content = "This micropost really ties the room together"
+    picture = fixture_file_upload('test/fixtures/rails.png', 'images/png')
     assert_difference 'Micropost.count', 1 do
-      post microposts_path, params: { micropost: { content: content } }
+      post microposts_path, params: { micropost: { content: content, picture: picture } }
     end
     assert_redirected_to root_url
+    assert @user.microposts.first.picture?
     follow_redirect!
     assert_match content, response.body
     # Delete post
