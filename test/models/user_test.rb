@@ -62,7 +62,6 @@ class UserTest < ActiveSupport::TestCase
     assert_equal mixed_case_email.downcase, @user.reload.email
   end
 
-  # ===== PASSWORD VALIDATION =====
   test "password should be present (nonblank)" do
     @user.password = @user.password_confirmation = " " * 6
     assert_not @user.valid?
@@ -77,7 +76,6 @@ class UserTest < ActiveSupport::TestCase
     assert_not @user.authenticated?(:remember, '')
   end
 
-  # ===== DEPENDENT DESTROY MICROPOSTS =====
   test "associated microposts should be destroyed" do
     @user.save
     @user.microposts.create!(content: "lorem ipsum")
@@ -86,7 +84,6 @@ class UserTest < ActiveSupport::TestCase
     end
   end
 
-  # ===== FOLLOWING AND UNFOLLOWING USERS =====
   test "should follow and unfollow a user" do
     michael = users(:michael)
     archer = users(:archer)
@@ -96,6 +93,20 @@ class UserTest < ActiveSupport::TestCase
     assert archer.followers.include?(michael)
     michael.unfollow(archer)
     assert_not michael.following?(archer)
+  end
+
+  test "feed should have the right posts" do
+    michael = users(:michael)
+    archer = users(:archer)
+    bruce = users(:bruce)
+    # Posts from followed user
+    bruce.microposts.each do |post_following|
+      assert michael.feed.include?(post_following)
+    end
+    # Posts from unfollowed user
+    archer.microposts.each do |post_unfollowed|
+      assert_not michael.feed.include?(post_unfollowed)
+    end
   end
   
 end
